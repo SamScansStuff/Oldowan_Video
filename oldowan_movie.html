@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synced Video & 3D Models</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Split-screen container */
+    .container {
+      display: flex;
+      height: 100%;
+      width: 100%;
+    }
+
+    /* Left side: Video */
+    .video-pane {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #000;
+      padding: 20px;
+    }
+
+    video {
+      width: 100%;
+      max-height: 100%;
+      border-radius: 8px;
+    }
+
+    /* Right side: 3D Models */
+    .model-pane {
+      flex: 1;
+      position: relative;
+      background-color: #1e1e1e;
+      border-left: 1px solid #333;
+    }
+
+    /* Stack all iframes on top of each other and hide by default */
+    .model-frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      opacity: 0;
+      pointer-events: none; /* Prevents clicking hidden models */
+      transition: opacity 0.4s ease-in-out;
+    }
+
+    /* Class added via JS when the timestamp matches */
+    .model-frame.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Placeholder text when no model is active */
+    .placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #666;
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+
+    /* Responsive stacking for mobile devices */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .model-pane {
+        border-left: none;
+        border-top: 1px solid #333;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- LEFT PANE: Video Player -->
+    <div class="video-pane">
+      <!-- Replace 'your-video.mp4' with your video file or hosted URL -->
+      <video id="main-video" controls>
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <!-- RIGHT PANE: 3D Model Iframes -->
+    <div class="model-pane">
+      <div class="placeholder">Play video to view 3D models...</div>
+
+      <!-- Model 1: Appears from 2s to 5s -->
+      <iframe 
+        class="model-frame" 
+        data-start="2" 
+        data-end="5" 
+        src="https://sketchfab.com/models/7w7pAfrCfjovwykkEeRFLGw5SXS/embed"
+        allow="autoplay; fullscreen; xr-spatial-tracking">
+      </iframe>
+
+      <!-- Model 2: Appears from 6s to 10s -->
+      <iframe 
+        class="model-frame" 
+        data-start="6" 
+        data-end="10" 
+        src="https://sketchfab.com/models/d1a6f7f161b941f999502d4512321234/embed"
+        allow="autoplay; fullscreen; xr-spatial-tracking">
+      </iframe>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('main-video');
+    const models = document.querySelectorAll('.model-frame');
+
+    // Runs continuously as the video plays or when the user scrubs the timeline
+    video.addEventListener('timeupdate', () => {
+      const currentTime = video.currentTime;
+
+      models.forEach(model => {
+        const startTime = parseFloat(model.getAttribute('data-start'));
+        const endTime = parseFloat(model.getAttribute('data-end'));
+
+        // Check if current video time falls within this model's window
+        if (currentTime >= startTime && currentTime <= endTime) {
+          model.classList.add('active');
+        } else {
+          model.classList.remove('active');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
